@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="pt">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lista de contatos</title>
+    <link rel="stylesheet" href="./contatos.css" />
+  </head>
+
+  <body>
+    <div id="conteiner"></div>
+
+    <!-- import react.js -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+    <!-- import react-dom.js -->
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+    <!-- babel é necessário para lidar com o JSX -->
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+
+    <script type="text/babel">
+      function criarSequencia() {
+        let i = 1;
+        return () => {
+          return i++;
+        };
+      }
+
+      const sequencia = criarSequencia();
+
+      const personagensIniciais = [
+        {
+          id: sequencia(),
+          caminhoFoto: './fotos/chaves.jpg',
+          nome: 'Chaves',
+          detalhe: '+52 9876-1110',
+        },
+        {
+          id: sequencia(),
+          caminhoFoto: './fotos/chiquinha.jpg',
+          nome: 'Chiquinha',
+          detalhe: '+52 9876-1111',
+        },
+        {
+          id: sequencia(),
+          caminhoFoto: './fotos/florinda.jpg',
+          nome: 'Dona Florinda',
+          detalhe: '+52 9876-1112',
+        },
+        {
+          id: sequencia(),
+          caminhoFoto: './fotos/quico.jpg',
+          nome: 'Quico',
+          detalhe: '+52 9876-1113',
+        },
+        {
+          id: sequencia(),
+          caminhoFoto: './fotos/barriga.jpg',
+          nome: 'Barriga',
+          detalhe: '+52 9876-1114',
+        },
+        {
+          id: sequencia(),
+          caminhoFoto: './fotos/madruga.jpg',
+          nome: 'Madruga',
+          detalhe: '+52 9876-1115',
+        },
+      ];
+
+      class App extends React.Component {
+        constructor(props) {
+          super(props);
+
+          this.state = {
+            personagens: personagensIniciais,
+            filtro: '',
+            exibirLista: true,
+            caminhoFoto: '',
+            nome: '',
+            detalhe: '',
+          };
+        }
+        excluirPersonagem = (id) => {
+          this.setState({
+            personagens: this.state.personagens.filter((it) => id !== it.id),
+          });
+        };
+        render() {
+          const {
+            personagens,
+            filtro,
+            exibirLista,
+            caminhoFoto,
+            nome,
+            detalhe,
+          } = this.state;
+          return (
+            <React.Fragment>
+              {exibirLista ? (
+                <div id="lista">
+                  <input
+                    type="text"
+                    className="buscar-contatos"
+                    value={filtro}
+                    onChange={(e) => {
+                      this.setState({
+                        filtro: e.target.value,
+                      });
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className="adicionar-contato"
+                    onClick={() => this.setState({ exibirLista: false })}
+                  ></button>
+                  <Lista
+                    itens={personagens.filter(
+                      (it) =>
+                        it.nome.includes(filtro) || it.detalhe.includes(filtro)
+                    )}
+                    aoExcluir={this.excluirPersonagem}
+                  />
+                  ;
+                </div>
+              ) : (
+                <div id="formulario">
+                  <a
+                    id="voltar"
+                    onClick={() => this.setState({ exibirLista: true })}
+                  >
+                    Voltar
+                  </a>
+                  <form>
+                    <label>Caminho da foto:</label>
+                    <input
+                      type="text"
+                      value={caminhoFoto}
+                      onChange={(e) => {
+                        this.setState({
+                          caminhoFoto: e.target.value,
+                        });
+                      }}
+                    />
+                    <label for="nome">Nome:</label>
+                    <input
+                      type="text"
+                      value={nome}
+                      onChange={(e) => {
+                        this.setState({
+                          nome: e.target.value,
+                        });
+                      }}
+                    />
+                    <label for="telefone">Telefone:</label>
+                    <input
+                      type="text"
+                      value={detalhe}
+                      onChange={(e) => {
+                        this.setState({
+                          detalhe: e.target.value,
+                        });
+                      }}
+                    />
+                    <button
+                      type="button"
+                      id="salvar"
+                      onClick={() =>
+                        this.setState({
+                          personagens: [
+                            ...this.state.personagens,
+                            {
+                              id: sequencia(),
+                              caminhoFoto,
+                              nome,
+                              detalhe,
+                            },
+                          ],
+                          exibirLista: true
+                        })
+                      }
+                    >
+                      Salvar
+                    </button>
+                  </form>
+                </div>
+              )}
+            </React.Fragment>
+          );
+        }
+      }
+
+      class Lista extends React.Component {
+        constructor(props) {
+          super(props);
+        }
+        render() {
+          const { itens, aoExcluir } = this.props;
+          return (
+            <ol className="contato-lista" id="contatoLista">
+              {itens.map((it) => (
+                <ItemLista
+                  key={it.id}
+                  id={it.id}
+                  caminhoFoto={it.caminhoFoto}
+                  nome={it.nome}
+                  detalhe={it.detalhe}
+                  aoExcluir={aoExcluir}
+                />
+              ))}
+            </ol>
+          );
+        }
+      }
+
+      class ItemLista extends React.Component {
+        constructor(props) {
+          super(props);
+        }
+        render() {
+          const { id, caminhoFoto, nome, detalhe, aoExcluir } = this.props;
+          return (
+            <li className="contato-lista-item">
+              <div
+                className="contato-avatar"
+                style={{ backgroundImage: `url(${caminhoFoto})` }}
+              ></div>
+              <div className="contato-detalhes">
+                <p>{nome}</p>
+                <p>{detalhe}</p>
+              </div>
+              <button
+                className="contato-remover js-contato-remover"
+                onClick={() => aoExcluir(id)}
+              >
+                Remover
+              </button>
+            </li>
+          );
+        }
+      }
+
+      ReactDOM.render(<App />, document.getElementById('conteiner'));
+    </script>
+  </body>
+</html>
